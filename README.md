@@ -1,4 +1,4 @@
-<h1>Projet Grims</h1>
+<h1>Grims Project</h1>
 <p><strong>Author : </strong>Camille ESCHER</p>
 
 <p><strong>Start date : </strong>   10/17/15</br><strong>Deadline : </strong>12/15/15</p>
