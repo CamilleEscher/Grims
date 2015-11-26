@@ -6,7 +6,7 @@ CMODE = -g
 endif
 CFLAGS = -Wall -Werror -Wextra $(CMODE) -std=c++11 -g
 TARGET = grims
-OBJ = main.o tools.o
+OBJ = main.o tools.o staveDetection.o Bivector.o Staves.o
 LIB = -lopencv_core -lopencv_highgui -lopencv_imgproc
 
 all : $(TARGET)
@@ -19,6 +19,12 @@ main.o : main.cpp
 
 tools.o : tools.cpp tools.hpp
 	$(CC) $(CFLAGS) -c tools.cpp
+
+Bivector.o : Bivector.cpp Bivector.hpp
+	$(CC) $(CFLAGS) -c Bivector.cpp
+
+staveDetection.o : staveDetection.cpp staveDetection.hpp
+	$(CC) $(CFLAGS) -c staveDetection.cpp
 
 Staves.o : Staves.cpp Staves.hpp
 	$(CC) $(CFLAGS) -c Staves.cpp

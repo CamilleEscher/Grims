@@ -13,12 +13,16 @@ double				radToDeg(double angle);
 
 std::vector<int>	getHorizontalProfil(cv::Mat const& score);
 
-int					getInterline(std::vector<int> profilVect);
+int					findInterline(std::vector<int> profilVect);
 
 cv::Mat				getVerticalProfil(cv::Mat const& score);
 
 cv::Mat				sharp(cv::Mat& img);
 
 cv::Mat				getLaplacianKernel(int radius);
+
+int					getMax(std::vector<int>	const&	data);
+
+int					getMaxIndex(std::vector<int> const& data);
 
 #endif

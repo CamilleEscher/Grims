@@ -54,7 +54,7 @@ std::vector<int>	getHorizontalProfil(cv::Mat const& img)
 	return profilVect;
 }
 
-int		getInterline(std::vector<int> profilVect)
+int		findInterline(std::vector<int> profilVect)
 {
 
 	std::vector<int>	autoCorrelationProfilVect;
@@ -145,4 +145,36 @@ cv::Mat	getLaplacianKernel(int radius)
 		}
 	}
 	return laplacianKernel;
+}
+
+int		getMax(std::vector<int>	const&	data)
+{
+	int	dataSize = static_cast<int>(data.size());
+	int	max = 0;
+
+	for(int i = 0; i < dataSize; ++i)
+	{
+		if(data.at(i) > max)
+		{
+			max = data.at(i);
+		}
+	}
+	return max;
+}
+
+int		getMaxIndex(std::vector<int> const& data)
+{
+	int	dataSize = static_cast<int>(data.size());
+	int	max = 0;
+	int	maxIndex = 0;
+
+	for(int i = 0; i < dataSize; ++i)
+	{
+		if(data.at(i) > max)
+		{
+			max = data.at(i);
+			maxIndex = i;
+		}
+	}
+	return maxIndex;	
 }
