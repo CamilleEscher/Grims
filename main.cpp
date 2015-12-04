@@ -3,31 +3,60 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <vector>
+#include <set>
 #include <cmath>
 #include "tools.hpp"
 #include "Staves.hpp"
 #include "staveDetection.hpp"
 
-int main()
-{
-	std::string	scoreFolder = "scores/";
-	std::string	scoreName = "score_penche.png";//prelude-1.png";
-	std::string	scorePath = scoreFolder + scoreName;
-	cv::Mat		score = cv::imread(scorePath, CV_LOAD_IMAGE_GRAYSCALE);
+static std::string const OPTION_PRINT = "print";
+static std::string const OPTION_RESIZE = "resize";
 
-	if(score.empty())
+std::set<std::string>	makeArgumentSet(int argc, char* argv[])
+{
+	std::set<std::string>	arguments;
+
+	for(int i = 2; i < argc; ++i)
 	{
-		std::cout << scoreName << " can't be found" << std::endl;
-		return -1;
+		arguments.insert(argv[i]);
 	}
-	else
+	return arguments;
+}
+
+bool	isInSet(std::set<std::string> const& arguments, std::string const& argument)
+{
+	return (arguments.find(argument) != arguments.end());
+}
+
+int main(int argc, char* argv[])
+{
+	std::string				fileName;
+	Staves					staves;
+	cv::Mat					score;
+	std::set<std::string>	arguments = makeArgumentSet(argc, argv);
+
+	if(argc > 1)
 	{
-		//cv::resize(score, score, cv::Size(score.cols / 2, score.rows / 2));
-		//cv::Mat					binaryScore(binarize(score, 220));
-		Staves	staves;
-		staves.setup(score);
-		//cv::imshow("binaryScore", binaryScore);
-		cv::waitKey(0);
+		fileName = argv[1];
+		score = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
+
+		if(score.empty())
+		{
+			std::cout << "'" << fileName << "' can't be found" << std::endl;
+			return -1;
+		}
+		else
+		{
+			if(isInSet(arguments, OPTION_RESIZE))
+			{
+				cv::resize(score, score, cv::Size(score.cols / 2, score.rows / 2));
+			}
+			staves.setup(score);
+			if(isInSet(arguments, OPTION_PRINT))
+			{
+				staves.print();
+			}
+		}
 	}
 	return 0;
 }

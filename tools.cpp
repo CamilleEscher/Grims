@@ -34,7 +34,7 @@ std::vector<int>	getHorizontalProfil(cv::Mat const& img)
 		for(int j = 0; j < img.cols; ++j)
 		{	
 			auto pixColor = img.at<unsigned char>(i, j);
-			profilVect[i] += ((pixColor / 255) + 1) % 2;
+			profilVect.at(i) += ((pixColor / 255) + 1) % 2;
 		}
 	}
 	//print profil
@@ -44,7 +44,7 @@ std::vector<int>	getHorizontalProfil(cv::Mat const& img)
 		for(int j = 0; j < img.cols; ++j)
 		{
 			//img.cols - profilVect[i]
-			if(profilVect[i] >= j)
+			if(profilVect.at(i) >= j)
 			{
 				profil.at<unsigned char>(i, j) = 0;
 			}
@@ -69,13 +69,13 @@ int		findInterline(std::vector<int> profilVect)
 		{
 			if((i + s) < profilVect.size())
 			{
-				autoCorrelationProfilVect[s] += profilVect[i] * profilVect[i + s];
+				autoCorrelationProfilVect.at(s) += profilVect.at(i) * profilVect.at(i + s);
 			}
 		}
 		// max of the autocorrelation of the horizontal profil
-		if(s > 3 && autoCorrelationProfilVect[s] >= autoProfilMax)
+		if(s > 3 && autoCorrelationProfilVect.at(s) >= autoProfilMax)
 		{
-			autoProfilMax = autoCorrelationProfilVect[s];
+			autoProfilMax = autoCorrelationProfilVect.at(s);
 			interline = s;
 		}
 	}
@@ -96,14 +96,14 @@ cv::Mat	getVerticalProfil(cv::Mat const& img)
 		for(int j = 0; j < img.rows; ++j)
 		{	
 			auto pixColor = img.at<cv::Vec3b>(cv::Point(i, j))[0];
-			profilVect[i] += static_cast<double>(pixColor / 255.0);
+			profilVect.at(i) += static_cast<double>(pixColor / 255.0);
 		}
 	}
 	for(int i = 0; i < img.cols; ++i)
 	{
 		for(int j = 0; j < img.rows; ++j)
 		{
-			if(profilVect[i] > static_cast<double>(img.rows - 1 - j))
+			if(profilVect.at(i) > static_cast<double>(img.rows - 1 - j))
 			{
 				profil.at<unsigned char>(j, i) = 255;
 			}
@@ -120,7 +120,7 @@ cv::Mat	sharp(cv::Mat& img)
 		return img;
 	}
 	cv::Mat	sharpImg;
-	cv::Mat laplacianKernel(getLaplacianKernel(img.cols / 3));
+	cv::Mat laplacianKernel(getLaplacianKernel(img.cols / 2));
 	cv::filter2D(img, sharpImg, img.type(), laplacianKernel);
 	return sharpImg;
 }

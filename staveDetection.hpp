@@ -22,12 +22,14 @@ std::vector<int>		getLocMaxima(std::vector<int> const& data, int range);
 
 std::vector<int>		getLineThicknessHistogram(std::vector<int> const& middleLinePositions, int heightSize, cv::Mat const& binaryImg);
 
-int						getLineThickness(std::vector<int> const& histogram, unsigned int maxHisto);
+double					getLineThickness(std::vector<int> const& histogram, unsigned int maxHisto);
 
 std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int> const& centerLinePositions, int interline);
 
-Bivector				getOrdsPosition(std::vector<cv::Mat> const& subImg, int thicknessMoy, int thickness0, int interline, std::vector<int> const& subImgCenter);
+Bivector				getOrdsPosition(std::vector<cv::Mat> const& subImg, double thicknessMoy, int thickness0, int interline, std::vector<int> const& subImgCenter);
 
-std::vector<unsigned char>	getMask(int interval, int thickness0);
+std::vector<int>		getMask(int interval, int thickness0);
+
+std::vector<int>		getCenterLineAbsc(int centerLinePosition, int interline, int thickness0, cv::Mat subImgI, int leftOrd, int rightOrd);
 
 #endif

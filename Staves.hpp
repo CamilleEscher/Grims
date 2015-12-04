@@ -16,7 +16,7 @@ public :
 	explicit				StaveLine(unsigned int id);
 	std::vector<int> const&	getAbsCoords() const;
 	unsigned int			getId() const;
-	//void					setup();
+	void					setup(std::vector<int> const& centerLineAbsc, int interline);
 };
 
 class Stave
@@ -34,7 +34,7 @@ public :
 	int								getId() const;
 	int								getLeftOrd() const;
 	int								getRightOrd() const;
-	void							setup(cv::Mat staveImg, int leftOrd, int rightOrd, std::vector<int> centerLineAbs);
+	void							setup(cv::Mat subImg, int leftOrd, int rightOrd, std::vector<int> centerLineAbs, int interline);
 };
 
 class Staves
@@ -42,7 +42,7 @@ class Staves
 	unsigned int		m_stavesNb;
 	std::vector<Stave>	m_staves;
 	int					m_interline;
-	int					m_thicknessMoy;
+	double				m_thicknessMoy;
 	int					m_thickness0;
 	cv::Mat				m_score;
 
@@ -50,8 +50,9 @@ public :
 	std::vector<Stave> const&	getStaves() const;
 	unsigned int				getStavesNb() const;
 	int							getInterline() const;
-	int							getThicknessMoy() const;
+	double						getThicknessMoy() const;
 	int							getThickness0() const;
 	cv::Mat const&				getScore() const;
 	void						setup(cv::Mat const& score);
+	void						print() const;
 };

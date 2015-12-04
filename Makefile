@@ -2,12 +2,12 @@ CC = clang++
 MODE = release
 CMODE = -O3
 ifeq ($(MODE),debug)
-CMODE = -g
+CMODE = -g -O0
 endif
-CFLAGS = -Wall -Werror -Wextra $(CMODE) -std=c++11 -g
+CFLAGS = -Wall -Werror -Wextra $(CMODE) -std=c++11
 TARGET = grims
 OBJ = main.o tools.o staveDetection.o Bivector.o Staves.o
-LIB = -lopencv_core -lopencv_highgui -lopencv_imgproc
+LIB = -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
 
 all : $(TARGET)
 
