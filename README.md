@@ -15,7 +15,7 @@
 <strong>Tools and language : </strong>
 <ul>
 <li>C++ (Language)</li>
-<li>Opencv.3.0.0(Library)</li>
+<li>Opencv 3.0 (Library)</li>
 <li>Makefile (Automation of compilation) (CMake later)</li>
 <li>clang++ (Compiler version 3.6.0-2ubuntu1)</li>
 <li>VIM (Editor)</li>
