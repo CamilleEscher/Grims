@@ -5,12 +5,17 @@
 #include <vector>
 #include <set>
 #include <cmath>
+#include <string>
 #include "tools.hpp"
 #include "Staves.hpp"
 #include "staveDetection.hpp"
+#include "boundingBoxDetection.hpp"
 
-static std::string const OPTION_PRINT = "print";
-static std::string const OPTION_RESIZE = "resize";
+static std::string const	OPTION_PRINT = "printLines";
+static std::string const	OPTION_RESIZE = "resize";
+static std::string const	OPTION_ERASE = "eraseLines";
+static std::string const	OPTION_GATHER = "gatherStaves";
+static std::string const	OPTION_VERTICALLINES = "printVerticalLines";
 
 std::set<std::string>	makeArgumentSet(int argc, char* argv[])
 {
@@ -38,7 +43,7 @@ int main(int argc, char* argv[])
 	if(argc > 1)
 	{
 		fileName = argv[1];
-		score = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
+		score = cv::imread(fileName, cv::IMREAD_GRAYSCALE);
 
 		if(score.empty())
 		{
@@ -55,6 +60,18 @@ int main(int argc, char* argv[])
 			if(isInSet(arguments, OPTION_PRINT))
 			{
 				staves.print();
+			}
+			if(isInSet(arguments, OPTION_ERASE))
+			{
+				staves.erase();
+			}
+			if(isInSet(arguments, OPTION_GATHER))
+			{
+				gatherImages(staves.getStaves());
+			}
+			if(isInSet(arguments, OPTION_VERTICALLINES))
+			{
+				std::vector<cv::Mat>	verticalLines = highLightVerticals(staves.getStaves());
 			}
 		}
 	}

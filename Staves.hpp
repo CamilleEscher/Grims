@@ -1,3 +1,5 @@
+#ifndef STAVES_HPP
+#define STAVES_HPP
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
@@ -30,11 +32,12 @@ class Stave
 public :
 									Stave(unsigned int id);
 	std::vector<StaveLine> const&	getStaveLines() const;
-	cv::Mat							getStaveImg() const;
+	cv::Mat	const&					getStaveImg() const;
 	int								getId() const;
 	int								getLeftOrd() const;
 	int								getRightOrd() const;
 	void							setup(cv::Mat subImg, int leftOrd, int rightOrd, std::vector<int> centerLineAbs, int interline);
+	void							setStaveImg(cv::Mat const& img);
 };
 
 class Staves
@@ -42,7 +45,7 @@ class Staves
 	unsigned int		m_stavesNb;
 	std::vector<Stave>	m_staves;
 	int					m_interline;
-	double				m_thicknessMoy;
+	double				m_thicknessAvg;
 	int					m_thickness0;
 	cv::Mat				m_score;
 
@@ -55,4 +58,7 @@ public :
 	cv::Mat const&				getScore() const;
 	void						setup(cv::Mat const& score);
 	void						print() const;
+	void						erase();
 };
+
+#endif

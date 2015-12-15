@@ -6,17 +6,9 @@ static double	PI = 3.14159265359;
 cv::Mat	binarize(cv::Mat const& img, unsigned char thresh)
 {
 	cv::Mat	binarizedImg(img.rows, img.cols, CV_8UC1);
-	cv::threshold(img, binarizedImg, thresh, 255, CV_THRESH_BINARY);
+	cv::threshold(img, binarizedImg, thresh, 255, cv::THRESH_BINARY);
 
 	return binarizedImg;
-}
-
-void rotate(cv::Mat const& src, double angle, cv::Mat& dst)
-{
-    cv::Point2f pt(src.cols, src.rows);
-    cv::Mat r = cv::getRotationMatrix2D(pt, angle, 1.0);
-
-    cv::warpAffine(src, dst, r, cv::Size(src.cols, src.rows));
 }
 
 double	radToDeg(double angle)
@@ -51,6 +43,7 @@ std::vector<int>	getHorizontalProfil(cv::Mat const& img)
 		}
 	}
 	//cv::imshow("profil", profil);
+	//cv::waitKey(0);
 	return profilVect;
 }
 
@@ -112,17 +105,37 @@ cv::Mat	getVerticalProfil(cv::Mat const& img)
 	return profil;
 }
 
-cv::Mat	sharp(cv::Mat& img)
+cv::Mat	filter(cv::Mat& img, cv::Mat kernel)
 {
-	if(img.empty())
+	if(img.empty() || kernel.empty())
 	{
-		std::cout << "img is empty" << std::endl;
+		std::cout << "param empty" << std::endl;
 		return img;
 	}
-	cv::Mat	sharpImg;
-	cv::Mat laplacianKernel(getLaplacianKernel(img.cols / 2));
-	cv::filter2D(img, sharpImg, img.type(), laplacianKernel);
-	return sharpImg;
+	cv::Mat	filteredImg;
+	//cv::filter2D(img, filteredImg, img.type(), kernel);
+	cv::dilate(img, filteredImg, kernel);
+	for(int i = 0; i < 5; ++i)
+	{
+		cv::dilate(filteredImg, filteredImg, kernel);
+	}
+	cv::imshow("filteredImg", filteredImg);
+	cv::waitKey(0);
+	return filteredImg;
+}
+
+cv::Mat	getSobelKernel(int radius)
+{
+	int		kernelSize = radius * 2 + 1;
+	cv::Mat	sobelKernel;
+	
+	sobelKernel = cv::Mat::zeros(kernelSize, kernelSize, CV_8UC1);
+
+	for(int i = 0; i < kernelSize; ++i)
+	{
+		sobelKernel.at<unsigned char>(((kernelSize - 1) / 2), i) = 1;
+	}
+	return sobelKernel;
 }
 
 cv::Mat	getLaplacianKernel(int radius)

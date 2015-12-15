@@ -8,7 +8,7 @@
 
 int						correlation(cv::Mat const& binaryImg);
 
-void					print(std::vector<double> const& values, int height, int heightScale, int width, int widthScale);
+void					print(std::vector<double> const& values, int height, int heightScale, int width, int widthScale, int first, int last, double S, std::string title = "correlation");
 
 cv::Mat					correctSlope(cv::Mat const& binaryImg);
 
@@ -18,6 +18,8 @@ std::vector<int>		getStavesProfilVect(std::vector<int> const& profilVect, int in
 
 std::vector<int>		detectCenterLinePos(std::vector<int> const& profilVect, int interline);
 
+int						detectCenterLinePosInSub(std::vector<int> const& profilVect, int interline);
+
 std::vector<int>		getLocMaxima(std::vector<int> const& data, int range);
 
 std::vector<int>		getLineThicknessHistogram(std::vector<int> const& middleLinePositions, int heightSize, cv::Mat const& binaryImg);
@@ -26,7 +28,7 @@ double					getLineThickness(std::vector<int> const& histogram, unsigned int maxH
 
 std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int> const& centerLinePositions, int interline);
 
-Bivector				getOrdsPosition(std::vector<cv::Mat> const& subImg, double thicknessMoy, int thickness0, int interline, std::vector<int> const& subImgCenter);
+Bivector				getOrdsPosition(std::vector<cv::Mat> const& subImg, double thicknessAvg, int thickness0, int interline, std::vector<int> const& subImgCenter);
 
 std::vector<int>		getMask(int interval, int thickness0);
 

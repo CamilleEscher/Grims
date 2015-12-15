@@ -41,7 +41,7 @@ std::vector<StaveLine> const&	Stave::getStaveLines() const
 	return m_staveLines;
 }
 
-cv::Mat	Stave::getStaveImg() const
+cv::Mat const&	Stave::getStaveImg() const
 {
 	return m_staveImg;
 }
@@ -59,6 +59,11 @@ int	Stave::getLeftOrd() const
 int	Stave::getRightOrd() const
 {
 	return m_rightOrd;
+}
+
+void	Stave::setStaveImg(cv::Mat const& img)
+{
+	m_staveImg = img;
 }
 
 // Staves implementation
@@ -80,7 +85,7 @@ int		Staves::getInterline() const
 
 double	Staves::getThicknessMoy() const
 {
-	return m_thicknessMoy;
+	return m_thicknessAvg;
 }
 
 int		Staves::getThickness0() const
@@ -130,14 +135,14 @@ void	Staves::setup(cv::Mat const& score)
 	m_stavesNb = static_cast<unsigned int>(centerLinePositions.size());
 	lineThicknessHistogram = getLineThicknessHistogram(centerLinePositions, static_cast<int>(6 * m_interline), m_score);
 	m_thickness0 = getMaxIndex(lineThicknessHistogram);
-	m_thicknessMoy = getLineThickness(lineThicknessHistogram, m_thickness0);
+	m_thicknessAvg = getLineThickness(lineThicknessHistogram, m_thickness0);
 	subImg = extractSubImages(m_score, centerLinePositions, m_interline);
 	for(int i = 0; i < static_cast<int>(subImg.size()); ++i)
 	{
 		profilVect = getHorizontalProfil(subImg.at(i));
-		centerLinePositions.at(i) = (detectCenterLinePos(profilVect, m_interline).at(0));
+		centerLinePositions.at(i) = (detectCenterLinePosInSub(profilVect, m_interline));//.at(0));
 	}
-	ords = getOrdsPosition(subImg, m_thicknessMoy, m_thickness0, m_interline, centerLinePositions);
+	ords = getOrdsPosition(subImg, m_thicknessAvg, m_thickness0, m_interline, centerLinePositions);
 	m_staves.reserve(m_stavesNb); 
 	leftOrds = ords.getLeft();
 	rightOrds = ords.getRight();
@@ -160,7 +165,7 @@ void	Staves::print() const
 	{
 		Stave stave = m_staves.at(stave_id);
 		cv::Mat	subImg;
-		cvtColor(stave.getStaveImg(), subImg, CV_GRAY2RGB);
+		cvtColor(stave.getStaveImg(), subImg, cv::COLOR_GRAY2RGB);
 		int left = stave.getLeftOrd();
 		int right = stave.getRightOrd();
 		for(unsigned int staveLine_id = 0; staveLine_id < 5; ++staveLine_id)
@@ -171,7 +176,60 @@ void	Staves::print() const
 				subImg.at<cv::Vec3b>(cv::Point(y, abs.at(y - left))) = blue;
 			}
 		}
-		cv::imshow(std::to_string(stave_id), subImg);
+		cv::imshow("lines of image " + std::to_string(stave_id), subImg);
+		cv::waitKey(0);
+	}
+}
+
+void	Staves::erase()
+{
+	unsigned char	white = 255;
+	unsigned char	black = 0;
+	int				thicknessThresh = round(m_thicknessAvg) + 2;
+
+	for(unsigned int stave_id = 0; stave_id < m_stavesNb; ++stave_id)
+	{
+		Stave 		stave = m_staves.at(stave_id);
+		cv::Mat		subImg = stave.getStaveImg().clone();
+		int			left = stave.getLeftOrd();
+		int 		right = stave.getRightOrd();
+		for(unsigned int staveLine_id = 0; staveLine_id < 5; ++staveLine_id)
+		{
+			std::vector<int> const&	abs = stave.getStaveLines().at(staveLine_id).getAbsCoords();
+			for(int y = left; y <= right; ++y)
+			{
+				int x = abs.at(y - left);
+				int xUp = x;
+				int xDown = x;
+				// find the length of the vertical black segment from either side of every line of stave
+				while((subImg.at<unsigned char>(xUp, y) == black || subImg.at<unsigned char>(xUp - 1, y) == black)  && xUp >= 0)
+				{
+					--xUp;
+				}
+				while((subImg.at<unsigned char>(xDown, y) == black || subImg.at<unsigned char>(xDown + 1, y) == black) && xDown < subImg.rows)
+				{
+					++xDown;
+				}
+				//std::cout << xDown - xUp << std::endl;
+				// criteria 1
+				if(xDown - xUp <= thicknessThresh)
+				{
+					// criteria 2 & 3
+					if(xUp > x - thicknessThresh && xDown < x + thicknessThresh)
+					{
+						for(int xErased = xUp; xErased < xDown + 1; ++xErased)
+						{
+							if(xErased >= 0 && xErased < subImg.rows)
+							{
+								subImg.at<unsigned char>(xErased, y) = white;
+							}
+						}
+					}
+				}
+			}
+		}
+		m_staves.at(stave_id).setStaveImg(subImg);
+		cv::imshow("erasure of lines of image " + std::to_string(stave_id), subImg);
 		cv::waitKey(0);
 	}
 }
