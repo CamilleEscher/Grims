@@ -6,32 +6,101 @@
 #include <vector>
 #include "Bivector.hpp"
 
+/*!
+  	\brief
+	To find the angle of the slope of the staves, we use the correlation beetwen the half left part and right part of the score (the best vertical shift (h) of one of them enables us to find hMax and then the angle)
+
+	\param binaryImg binarized image of the page of score
+*/
 int						correlation(cv::Mat const& binaryImg);
 
-void					print(std::vector<double> const& values, int height, int heightScale, int width, int widthScale, int first, int last, double S, std::string title = "correlation");
+/*!
+  	\brief
+	Correction of the slope according to hMax
 
+	\param binaryImg binarized image of the page of score
+*/
 cv::Mat					correctSlope(cv::Mat const& binaryImg);
 
-double					getTheta(int hMax, int width);
+/*!
+  	\brief
+	According to the processed vertical profile of the image (where the maximums correspond to the lines of the staves) we process a new profile which maxima represents the middle line of every stave
 
-std::vector<int>		getStavesProfilVect(std::vector<int> const& profilVect, int interline);
+	\param profileVect vector containing a number of elements equals to the number of row of the page of score. Each element corresponds to the number of black pixel (which belong to the lines of stave)
+	\param interline average distance between 2 lines of stave
+ */
+std::vector<int>		getStavesProfileVect(std::vector<int> const& profileVect, int interline);
 
-std::vector<int>		detectCenterLinePos(std::vector<int> const& profilVect, int interline);
+/*!
+  	\brief
+	Find every index of rows of the middle line of all the staves in the whole score
 
-int						detectCenterLinePosInSub(std::vector<int> const& profilVect, int interline);
+	\param profileVect see getStavesProfileVect param
+	\param interline see getStavesProfileVect param
+*/
+std::vector<int>		detectMiddleLineAbsc(std::vector<int> const& profileVect, int interline);
 
-std::vector<int>		getLocMaxima(std::vector<int> const& data, int range);
+/*!
+  	\brief
+	Adapt the method of detectMiddleLineAbsc to adjust the index of row of the middle line of stave according the vertical profile of just one stave (profileVect here is a part of the previous considered profileVect)
 
-std::vector<int>		getLineThicknessHistogram(std::vector<int> const& middleLinePositions, int heightSize, cv::Mat const& binaryImg);
+	\param profileVect vector containing a number of elements equals to the number of row of the i-th stave of the score. Each element corresponds to the number of black pixel (which belong to the lines of stave)
+	\param interline see getStavesProfileVect param
+*/
+int						detectMiddleLineAbscInSub(std::vector<int> const& profileVect, int interline);
 
+/*!
+  	\brief
+	To determine the average thickness of the lines in all the staves, we process the histogram of the thickness of every lines
+
+	\param middleLineAbscs vector of abscissa of the third lines of stave in every stave of the image
+	\param heightSize heigth of the page of score
+	\param binaryImg binarized page of score
+*/
+std::vector<int>		getLineThicknessHistogram(std::vector<int> const& middleLineAbscs, int heightSize, cv::Mat const& binaryImg);
+
+/*!
+  	\brief
+	maxHisto represents 'thickness0', the most represented value in the histogram of the thicknesses; this functions evaluate 'thicknessAvg' by getting an average of the 3 columns in the histogram that are around thickness0
+
+	\param histogram histogram of the vertical thicknesses in the page of score
+	\param maxHisto maximum value of the histogram
+*/
 double					getLineThickness(std::vector<int> const& histogram, unsigned int maxHisto);
 
-std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int> const& centerLinePositions, int interline);
+/*!
+  	\brief
+	Extraction the sub images of every staves in the whole score
 
-Bivector				getOrdsPosition(std::vector<cv::Mat> const& subImg, double thicknessAvg, int thickness0, int interline, std::vector<int> const& subImgCenter);
+	\param binaryImg see getLineThicknessHistogram
+	\param middleLineAbscs see getLineThicknessHistogram
+	\param interline see getStavesProfileVect
+*/
+std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int> const& middleLineAbscs, int interline);
 
-std::vector<int>		getMask(int interval, int thickness0);
+/*!
+  	\brief
+	Process of the left and right ordinates of every staves in every sub images with an horizontal profile of every sub images thresholded in the lest and right part ords is an instance of a class Bivector which contains 2 vectors : the vector of the left ordinates of the sub images and the vector of the right ones
 
-std::vector<int>		getCenterLineAbsc(int centerLinePosition, int interline, int thickness0, cv::Mat subImgI, int leftOrd, int rightOrd);
+	\param subImg see getLineThicknessHistogram
+	\param thicknessAvg average vertical thickness of the lines of stave
+	\param thickness0 most represented value in the histogram of vertical thicknesses
+	\param interline see getStavesProfileVect
+	\param middleLineAbscs see getLineThicknessHistogram
+*/
+Bivector				getOrdsPosition(std::vector<cv::Mat> const& subImg, double thicknessAvg, int thickness0, int interline, std::vector<int> const& middleLineAbscs);
+
+/*!
+  	\brief
+	Processes the 'algorithme de poursuite des portées' => tracking of staves algorithm in the thesis : it calculates the better abscissa (row) of the middle line of a stave at every column
+
+	\param middleLineAbsc see getMaxDeltaOrdProfile
+	\param interline see getStavesProfileVect
+	\param thickness0 see getMaxDeltaOrdProfile
+	\param subImgI see subImg in getMaxDeltaOrdProfile
+	\param leftOrd first detected ordinate of the stave
+	\param rightOrd last detected oridnate of the stave
+*/
+std::vector<int>		getMiddleLineAbsc(int middleLineAbsc, int interline, int thickness0, cv::Mat subImgI, int leftOrd, int rightOrd);
 
 #endif

@@ -32,6 +32,9 @@ boundingBoxDetection.o : boundingBoxDetection.cpp boundingBoxDetection.hpp
 Staves.o : Staves.cpp Staves.hpp
 	$(CC) $(CFLAGS) -c Staves.cpp
 
+doc :
+	doxygen Doxyfile
+
 re : fclean $(TARGET)
 
 fclean : clean

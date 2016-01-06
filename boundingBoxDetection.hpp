@@ -6,22 +6,32 @@
 #include <vector>
 #include "Staves.hpp"
 
-cv::Mat					getVerticalSegmentsMap(cv::Mat const& subImg);
+/*!
+  \brief
+  Gather the sub images that contains paired staves (linked by curly brackets)
 
+  \param staves vector of Stave
+*/
 void					gatherImages(std::vector<Stave> const& staves);
 
-cv::Mat					getHorizontalSegInVerticalSeg(cv::Mat const& subImg);
+/*! 
+  \brief
+  Display the significant vertical segments of every stave (the brightest represent the longest)
 
-cv::Mat 				applyClosingOperation(cv::Mat const& horLinesImg, cv::Mat const& subImg);
-
+  \param staves vector of Stave
+*/
 std::vector<cv::Mat>	highLightVerticals(std::vector<Stave> const& staves);
 
-cv::Mat					getHorizontalSegmentsMap(cv::Mat const& subImg);
+/*!
+  \brief
+  use the hough transform to detect the circles in sub images
+*/
+void					detectCircles(std::vector<Stave> const& staves, int interline);
 
-bool					areStavesPaired(cv::Mat const& subImgUp, cv::Mat const& subImgDown, int absCoordMiddleLineUp, int absCoordMiddleLineDown);
-
-cv::Mat					gatherImages(cv::Mat const&	imgUp, cv::Mat const& imgDown, int absDownUpperStaveLine);
-
-bool					compareRectangles(cv::Mat const& rectUp, cv::Mat const& rectDown);
+/*!
+ \brief
+ erode the sub images according to a circular kernel which size is proportional to the interline
+*/
+void					erodeWithEllipseElement(std::vector<Stave> const& staves, int interline);
 
 #endif

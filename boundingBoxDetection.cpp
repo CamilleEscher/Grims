@@ -1,11 +1,53 @@
 #include "boundingBoxDetection.hpp"
 
+/*!
+  \brief 
+  return true if both Mat arguments are equal
+*/
+static bool	compareRectangles(cv::Mat const& rectUp, cv::Mat const& rectDown);
+
+/*!
+  \brief
+  return true if 2 staves are linked by a curly bracket
+*/
+static bool	areStavesPaired(cv::Mat const& subImgVUp, cv::Mat const& subImgVDown, int absCoordMiddleLineUp, int absCoordMiddleLineDown);
+
+/*!
+  \brief gather 2 paired sub images 
+*/
+static cv::Mat	gatherSubImages(cv::Mat const&	imgUp, cv::Mat const& imgDown, int absDownUpperStaveLine);
+
+/*!
+  \brief
+  Detect all vertical segments in a sub image and return an image which size is the same as the considered sub image and the color correspond to the length of the detected segments (the brighter are the longer)
+*/
+static cv::Mat	getHorizontalSegInVerticalSeg(cv::Mat const& subImg);
+
+/*!
+   \brief
+   Detect significant horizontal segments in a sub image and return the image which color correspond to the length of segments
+*/
+static cv::Mat	getVerticalSegmentsMap(cv::Mat const& subImg);
+
+/*!
+  \brief
+  Detect the horizontal segments which belongs to vertical segments
+*/
+static cv::Mat	getHorizontalSegmentsMap(cv::Mat const& subImg);
+
+/*!
+  \brief
+  Adjust the map of the vertical segments by filling the black pixels which are between 2 maximums in the map of the horizontal segments of the verticals
+*/
+static cv::Mat applyClosingOperation(cv::Mat const& horLinesImg, cv::Mat const& subImg);
+
 void	gatherImages(std::vector<Stave> const& staves)
 {
 	std::vector<cv::Mat>	subImgV;
 	cv::Mat					subImg;
 	int						subImagesNb = static_cast<unsigned int>(staves.size());
 	Stave					previousStave = staves.at(0);
+	bool					isPairedStaves = false;
 
 	subImgV.reserve(subImagesNb);
     for(int i = 0; i < subImagesNb; ++i)
@@ -21,12 +63,63 @@ void	gatherImages(std::vector<Stave> const& staves)
 			bool arePaired = areStavesPaired(subImgV.at(i - 1), subImgV.at(i), absUp, absDown);
 			if(arePaired)
 			{
-				subImg = gatherImages(previousStave.getStaveImg(), stave.getStaveImg(), stave.getStaveLines().at(0).getAbsCoords().at(0));
+				subImg = gatherSubImages(previousStave.getStaveImg(), stave.getStaveImg(), stave.getStaveLines().at(0).getAbsCoords().at(0));
 				cv::imshow("gathered " + std::to_string(i), subImg);
 				cv::waitKey(0);
+				isPairedStaves = true;
 			}
 		}
 		previousStave = stave;
+	}
+	if(!isPairedStaves)
+	{
+		std::cout << "The score contains no linked staves" << std::endl;
+	}
+}
+
+void	detectCircles(std::vector<Stave> const& staves, int interline)
+{
+	std::vector<cv::Vec3f>	circles;
+	int						minRadius = std::round(static_cast<double>(interline) / 4.0);
+	int						maxRadius = std::round(static_cast<double>(interline) / 4.0 * 3.0);
+	cv::Mat					subImgRGB;
+	//static_cast<void>(minRadius);
+	static_cast<void>(maxRadius);
+
+	for(std::size_t i = 0; i < staves.size(); ++i)
+	{
+		cv::HoughCircles(staves.at(i).getStaveImg(), circles, cv::HOUGH_GRADIENT, 1, interline, 200, 3, 2, minRadius);
+		cvtColor(staves.at(i).getStaveImg(), subImgRGB, cv::COLOR_GRAY2RGB);
+		for(std::size_t c = 0; c < circles.size(); ++c)
+		{
+			cv::Point center(std::round(circles[c][0]), std::round(circles[c][1]));
+			int radius = std::round(circles[c][2]);
+			// circle center
+			cv::circle( subImgRGB, center, 3, cv::Scalar(255,0,0), -1, 8, 0 );
+			// circle outline
+			cv::circle( subImgRGB, center, radius, cv::Scalar(0,0,255), 1, 8, 0 );
+		}
+		cv::imshow("circles in stave " + std::to_string(i), subImgRGB);
+		cv::waitKey(0);
+	}
+}
+
+void	erodeWithEllipseElement(std::vector<Stave> const& staves, int interline)
+{
+	std::vector<cv::Vec3f>	circles;
+	int						minRadius = std::round(static_cast<double>(interline) / 4.0);
+	int						maxRadius = std::round(static_cast<double>(interline) / 4.0 * 3.0);
+	int						dilation_size = minRadius / 2;
+
+	static_cast<void>(minRadius);
+	static_cast<void>(maxRadius);
+	for(std::size_t i = 0; i < staves.size(); ++i)
+	{
+		cv::Mat	subImg = staves.at(i).getStaveImg();
+		cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 2*dilation_size + 1, 2*dilation_size+1 ), cv::Point( dilation_size, dilation_size ) );
+		subImg = 255 - subImg;
+		cv::erode(subImg, subImg, element);
+		cv::erode(subImg, subImg, element);
 	}
 }
 
@@ -63,7 +156,7 @@ std::vector<cv::Mat>	highLightVerticals(std::vector<Stave> const& staves)
 	return subImgV;
 }
 
-cv::Mat	gatherImages(cv::Mat const&	imgUp, cv::Mat const& imgDown, int absDownUpperStaveLine)
+static cv::Mat	gatherSubImages(cv::Mat const&	imgUp, cv::Mat const& imgDown, int absDownUpperStaveLine)
 {
 	cv::Mat	bottomRectInUp = imgUp(cv::Rect(0, imgUp.rows - 21, imgUp.cols, 20));
 	cv::Mat	gatheredImg;
@@ -94,7 +187,7 @@ cv::Mat	gatherImages(cv::Mat const&	imgUp, cv::Mat const& imgDown, int absDownUp
 	return gatheredImg;
 }
 
-bool	compareRectangles(cv::Mat const& rectUp, cv::Mat const& rectDown)
+static bool	compareRectangles(cv::Mat const& rectUp, cv::Mat const& rectDown)
 {
 	if(rectUp.size() == rectDown.size())
 	{
@@ -112,7 +205,7 @@ bool	compareRectangles(cv::Mat const& rectUp, cv::Mat const& rectDown)
 	return true;
 }
 
-bool	areStavesPaired(cv::Mat const& subImgVUp, cv::Mat const& subImgVDown, int absCoordMiddleLineUp, int absCoordMiddleLineDown)
+static bool	areStavesPaired(cv::Mat const& subImgVUp, cv::Mat const& subImgVDown, int absCoordMiddleLineUp, int absCoordMiddleLineDown)
 {
 	unsigned char				pixCol = 0;
 	int							minLengthUp = 0;
@@ -159,7 +252,7 @@ bool	areStavesPaired(cv::Mat const& subImgVUp, cv::Mat const& subImgVDown, int a
 	return (paired > 2);
 }
 
-cv::Mat	getVerticalSegmentsMap(cv::Mat const& subImg)
+static cv::Mat	getVerticalSegmentsMap(cv::Mat const& subImg)
 {
 	unsigned char			lineLength = 0;
 	int						xShift = 0;
@@ -197,7 +290,7 @@ cv::Mat	getVerticalSegmentsMap(cv::Mat const& subImg)
 	return vertLinesImg;
 }
 
-cv::Mat	getHorizontalSegmentsMap(cv::Mat const& subImg)
+static cv::Mat	getHorizontalSegmentsMap(cv::Mat const& subImg)
 {
 	unsigned char			lineLength = 0;
 	int						yShift = 0;
@@ -235,7 +328,7 @@ cv::Mat	getHorizontalSegmentsMap(cv::Mat const& subImg)
 	return horSegmentsMap;
 }
 
-cv::Mat	getHorizontalSegInVerticalSeg(cv::Mat const& subImg)
+static cv::Mat	getHorizontalSegInVerticalSeg(cv::Mat const& subImg)
 {
 	cv::Mat				horLinesImg;
 	std::vector<float>	kernel;
@@ -283,7 +376,7 @@ cv::Mat	getHorizontalSegInVerticalSeg(cv::Mat const& subImg)
 	return horLinesImg;
 }
 
-cv::Mat applyClosingOperation(cv::Mat const& horLinesImg, cv::Mat const& subImg)
+static cv::Mat applyClosingOperation(cv::Mat const& horLinesImg, cv::Mat const& subImg)
 {
 	cv::Mat	newSubImg = subImg.clone();
 	for(int x = 0; x < horLinesImg.cols; ++x)

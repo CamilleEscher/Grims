@@ -2,6 +2,10 @@
 #define BIVECTOR_HPP
 #include <vector>
 
+/*!
+	\class Bivector
+	\brief Bivector stores 2 vectors : the first and last ordinates of each stave in the page
+*/
 class Bivector
 {
 	std::vector<int>	m_left;

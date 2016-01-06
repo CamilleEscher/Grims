@@ -10,12 +10,14 @@
 #include "Staves.hpp"
 #include "staveDetection.hpp"
 #include "boundingBoxDetection.hpp"
+#include <stdexcept>
 
 static std::string const	OPTION_PRINT = "printLines";
 static std::string const	OPTION_RESIZE = "resize";
 static std::string const	OPTION_ERASE = "eraseLines";
 static std::string const	OPTION_GATHER = "gatherStaves";
 static std::string const	OPTION_VERTICALLINES = "printVerticalLines";
+static std::string const	OPTION_CIRCLES = "printCircles";
 
 std::set<std::string>	makeArgumentSet(int argc, char* argv[])
 {
@@ -52,26 +54,38 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			if(isInSet(arguments, OPTION_RESIZE))
+			try
 			{
-				cv::resize(score, score, cv::Size(score.cols / 2, score.rows / 2));
+				if(isInSet(arguments, OPTION_RESIZE))
+				{
+					cv::resize(score, score, cv::Size(score.cols / 2, score.rows / 2));
+				}
+				staves.setup(score);
+				if(isInSet(arguments, OPTION_PRINT))
+				{
+					staves.print();
+				}
+				if(isInSet(arguments, OPTION_ERASE))
+				{
+					staves.erase();
+				}
+				if(isInSet(arguments, OPTION_GATHER))
+				{
+					gatherImages(staves.getStaves());
+				}
+				if(isInSet(arguments, OPTION_VERTICALLINES))
+				{
+					std::vector<cv::Mat>	verticalLines = highLightVerticals(staves.getStaves());
+				}
+				if(isInSet(arguments, OPTION_CIRCLES))
+				{
+					erodeWithEllipseElement(staves.getStaves(), staves.getInterline());
+					detectCircles(staves.getStaves(), staves.getInterline());
+				}
 			}
-			staves.setup(score);
-			if(isInSet(arguments, OPTION_PRINT))
+			catch(std::exception &e)
 			{
-				staves.print();
-			}
-			if(isInSet(arguments, OPTION_ERASE))
-			{
-				staves.erase();
-			}
-			if(isInSet(arguments, OPTION_GATHER))
-			{
-				gatherImages(staves.getStaves());
-			}
-			if(isInSet(arguments, OPTION_VERTICALLINES))
-			{
-				std::vector<cv::Mat>	verticalLines = highLightVerticals(staves.getStaves());
+				std::cout << e.what() << std::endl;
 			}
 		}
 	}

@@ -18,14 +18,14 @@ unsigned int	StaveLine::getId() const
 	return m_id;
 }
 
-void	StaveLine::setup(std::vector<int> const&	centerLineAbsc, int interline)
+void	StaveLine::setup(std::vector<int> const&	middleLineAbscs, int interline)
 {
 	int	shift = (interline) * (m_id - 2);
-	int	vectorSize = centerLineAbsc.size();
-	m_absCoords.reserve(centerLineAbsc.size());
+	int	vectorSize = middleLineAbscs.size();
+	m_absCoords.reserve(middleLineAbscs.size());
 	for(int i = 0; i < vectorSize; ++i)
 	{
-		m_absCoords.push_back(centerLineAbsc.at(i) + shift);
+		m_absCoords.push_back(middleLineAbscs.at(i) + shift);
 	}
 }
 
@@ -97,7 +97,8 @@ cv::Mat const&	Staves::getScore() const
 {
 	return m_score;
 }
-void	Stave::setup(cv::Mat subImg, int leftOrd, int rightOrd, std::vector<int> centerLineAbs, int interline)
+
+void	Stave::setup(cv::Mat subImg, int leftOrd, int rightOrd, std::vector<int> middleLineAbscs, int interline)
 {
 	std::vector<StaveLine>	staveLines;
 	unsigned int			staveLinesSize = 5;
@@ -110,7 +111,7 @@ void	Stave::setup(cv::Mat subImg, int leftOrd, int rightOrd, std::vector<int> ce
 	for(unsigned int i = 0; i < staveLinesSize; ++i)
 	{
 		StaveLine staveLine(i);	
-		staveLine.setup(centerLineAbs, interline);
+		staveLine.setup(middleLineAbscs, interline);
 		staveLines.push_back(staveLine);
 	}
 	m_staveLines = staveLines;
@@ -119,41 +120,39 @@ void	Stave::setup(cv::Mat subImg, int leftOrd, int rightOrd, std::vector<int> ce
 void	Staves::setup(cv::Mat const& score)
 {
 	std::vector<int>			profilVect;
-	std::vector<int>			centerLinePositions;
-	std::vector<int>			newCenterLinePositions;
+	std::vector<int>			middleLineAbscs;
+	//std::vector<int>			newMiddleLineAbscs;
 	std::vector<int>			lineThicknessHistogram;
-	std::vector<int>			centerLineAbsc;
+	std::vector<int>			middleLineAbsc;
 	std::vector<int> 			leftOrds;
 	std::vector<int> 			rightOrds; 
 	std::vector<cv::Mat>		subImg;
 	Bivector					ords;
 
 	m_score = correctSlope(binarize(score.clone(), 220));
-	profilVect = getHorizontalProfil(m_score);
+	profilVect = getHorizontalProfile(m_score);
 	m_interline = findInterline(profilVect);
-	centerLinePositions = detectCenterLinePos(profilVect, m_interline);
-	m_stavesNb = static_cast<unsigned int>(centerLinePositions.size());
-	lineThicknessHistogram = getLineThicknessHistogram(centerLinePositions, static_cast<int>(6 * m_interline), m_score);
+	middleLineAbscs = detectMiddleLineAbsc(profilVect, m_interline);
+	m_stavesNb = static_cast<unsigned int>(middleLineAbscs.size());
+	lineThicknessHistogram = getLineThicknessHistogram(middleLineAbscs, static_cast<int>(6 * m_interline), m_score);
 	m_thickness0 = getMaxIndex(lineThicknessHistogram);
 	m_thicknessAvg = getLineThickness(lineThicknessHistogram, m_thickness0);
-	subImg = extractSubImages(m_score, centerLinePositions, m_interline);
+	subImg = extractSubImages(m_score, middleLineAbscs, m_interline);
 	for(int i = 0; i < static_cast<int>(subImg.size()); ++i)
 	{
-		profilVect = getHorizontalProfil(subImg.at(i));
-		centerLinePositions.at(i) = (detectCenterLinePosInSub(profilVect, m_interline));//.at(0));
+		profilVect = getHorizontalProfile(subImg.at(i));
+		middleLineAbscs.at(i) = (detectMiddleLineAbscInSub(profilVect, m_interline));
 	}
-	ords = getOrdsPosition(subImg, m_thicknessAvg, m_thickness0, m_interline, centerLinePositions);
+	ords = getOrdsPosition(subImg, m_thicknessAvg, m_thickness0, m_interline, middleLineAbscs);
 	m_staves.reserve(m_stavesNb); 
 	leftOrds = ords.getLeft();
 	rightOrds = ords.getRight();
 	for(unsigned int i = 0; i < m_stavesNb; ++i)
 	{
 		Stave stave(i);
-		centerLineAbsc = getCenterLineAbsc(centerLinePositions.at(i), m_interline, m_thickness0, subImg.at(i), leftOrds.at(i), rightOrds.at(i));
-		stave.setup(subImg.at(i), leftOrds.at(i), rightOrds.at(i), centerLineAbsc, m_interline);
+		middleLineAbsc = getMiddleLineAbsc(middleLineAbscs.at(i), m_interline, m_thickness0, subImg.at(i), leftOrds.at(i), rightOrds.at(i));
+		stave.setup(subImg.at(i), leftOrds.at(i), rightOrds.at(i), middleLineAbsc, m_interline);
 		m_staves.push_back(stave);
-		//cv::imshow(std::to_string(i), subImg.at(i));
-		//cv::waitKey(0);
 	}
 }
 
