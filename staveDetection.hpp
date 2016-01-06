@@ -51,7 +51,7 @@ int						detectMiddleLineAbscInSub(std::vector<int> const& profileVect, int inte
 
 /*!
   	\brief
-	To determine the average thickness of the lines in all the staves, we process the histogram of the thickness of every lines
+	To determine the average thickness of the lines in all the staves, we process the histogram of the thickness of every line
 
 	\param middleLineAbscs vector of abscissa of the third lines of stave in every stave of the image
 	\param heightSize heigth of the page of score
@@ -70,7 +70,7 @@ double					getLineThickness(std::vector<int> const& histogram, unsigned int maxH
 
 /*!
   	\brief
-	Extraction the sub images of every staves in the whole score
+	Extraction the sub images of every stave in the whole score
 
 	\param binaryImg see getLineThicknessHistogram
 	\param middleLineAbscs see getLineThicknessHistogram
@@ -80,7 +80,7 @@ std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int>
 
 /*!
   	\brief
-	Process of the left and right ordinates of every staves in every sub images with an horizontal profile of every sub images thresholded in the lest and right part ords is an instance of a class Bivector which contains 2 vectors : the vector of the left ordinates of the sub images and the vector of the right ones
+	Process of the left and right ordinates of every stave in every sub image with an horizontal profile of every sub image thresholded in the lest and right part ords is an instance of a class Bivector which contains 2 vectors : the vector of the left ordinates of the sub images and the vector of the right ones
 
 	\param subImg see getLineThicknessHistogram
 	\param thicknessAvg average vertical thickness of the lines of stave
