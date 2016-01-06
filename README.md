@@ -29,4 +29,5 @@ Use 'make' to build </br>Use 'make doc' to generate the documentation</p>
 <li>Makefile (Automation of compilation) (CMake later)</li>
 <li>clang++ (Compiler version 3.6.0-2ubuntu1)</li>
 <li>VIM (Editor)</li>
+<li>doxygen (Documentation)</li>
 </ul>
