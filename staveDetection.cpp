@@ -5,7 +5,7 @@
 
 /*!
   	\brief
-	Get the local maxima in the profile where maxima represent the middle line of every staves (the range of every considered maxima has to be near of the heigth of a stave : [-2 * interline ; 2 * interline])
+	Get the local maxima in the profile where maxima represent the middle line of every stave (the range of every considered maximum has to be near of the height of a stave : [-2 * interline ; 2 * interline])
 
 	\param data vector of data where local maxima have to be found
 	\param range minimum range between 2 local maxima
@@ -180,16 +180,16 @@ std::vector<int>	getStavesProfileVect(std::vector<int> const& profileVect, int i
 	if(interline > 0 && profileVect.size() > 0)
 	{
 		stavesProfileVect.assign(profileVectSize, 0);
-		// run through all the vertical profile range of values
+		// run through all the range of value of the vertical profile
 		for(int x = 0; x < profileVectSize; ++x)
 		{
 			// look for the line which is in the middle of the 5 lines of the stave
 			for(int i = -2; i <= 2; ++i)
 			{
-				// use an epsilon range on the considered interline because it varies at beetwen the lines of a stave
+				// use an epsilon range on the considered interline because it varies beetwen every line of stave
 				for(int j = -1; j <= 1; ++j)
 				{
-					// process the index of the row of the i considered line in the stave
+					// process the index of the row of the i-th considered line in the stave
 					indexLineRow = x + i * interline + j;
 					if((indexLineRow) < profileVectSize && (indexLineRow) >= 0)
 					{
@@ -282,7 +282,7 @@ std::vector<int>	getLineThicknessHistogram(std::vector<int> const& middleLineAbs
 		{
 			for(auto line = middleLineAbscs.begin(); line != middleLineAbscs.end(); ++line)
 			{
-				// we run through every rows beetwen middleLineRow - staveHalfHeight to middleLineRow + staveHalfHeight
+				// we run through every row beetwen middleLineRow - staveHalfHeight to middleLineRow + staveHalfHeight
 				for(int i = *line - halfHeightSize; i < *line + halfHeightSize; ++i)
 				{
 					if(i >= 0 && i < binaryImg.rows)
@@ -290,14 +290,14 @@ std::vector<int>	getLineThicknessHistogram(std::vector<int> const& middleLineAbs
 						colorPix = binaryImg.at<unsigned char>(i, j);
 						if(colorPix == black)
 						{
-							// if the color of the pixel is black => the thickness of the line is initialized at 1
+							// if the color of pixel is black => the thickness of line is initialized at 1
 							int thickness = 1;
-							// increase the value of thickness if the color of the pixel in the next row (++i) is still black (== 0)
+							// increase the value of thickness if the color of pixel in the next row (++i) is still black (== 0)
 							while(++i < *line + halfHeightSize && binaryImg.at<unsigned char>(i, j) == 0)
 							{
 								++thickness;
 							}
-							// to avoid the overtaking of the definition of the vector
+							// to avoid the overtaking of the definition of our vector
 							if(thickness < heightSize)
 							{
 								// store the thickness
@@ -341,9 +341,9 @@ std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int>
 	std::vector<int>		subImgHeight;
 	std::vector<cv::Mat>	subImages;
 
-	// subImgCenter represents the middle of 2 successive index of rows of middle lines in staves
+	// subImgCenter represents the middle of 2 successive middle lines of the staves in the page of score
 	subImgCenter.reserve(middleLineAbscsSize);
-	// subImgOrigin represents the position of the upper line in every staves
+	// subImgOrigin represents the position of the upper line in every stave
 	subImgOrigin.reserve(middleLineAbscsSize);
 	// subImgHeight is the height of the sub image 
 	subImgHeight.reserve(middleLineAbscsSize);
@@ -357,12 +357,12 @@ std::vector<cv::Mat>	extractSubImages(cv::Mat const& binaryImg, std::vector<int>
 	}
 	for(int i = 0; i < middleLineAbscsSize - 1; ++i)
 	{
-		// this formula has been implemented according to the expermiments of the thesis of Mrs ROSSANT, to get all the notes that are out of the lines of the staves, this is a valid height because it is greater than the height of a stave, it keeps an extra heights (according to the middle of 2 successive staves and the value of the inerline), which will be centered around the row of the middle line of the stave
+		// this formula has been implemented according to the expermiments of the thesis of Mrs ROSSANT, to get all the notes that are out of the lines of the staves, this is a valid height because it is greater than the height of a stave, it keeps extra heights (according to the middle of 2 successive staves and the value of inerline), which will be centered around the row of the middle line of the stave
 		subImgHeight.push_back(subImgCenter.at(i + 1) + 2 * interline - subImgOrigin.at(i));
 	}
 	// the last height is processed accoring the last row of the score
 	subImgHeight.push_back(binaryImg.rows - subImgOrigin.at(middleLineAbscsSize - 1));
-	// filling of the sub images
+	// fill the sub images
 	for(int i = 0; i < middleLineAbscsSize; ++i)
 	{
 		subImages.push_back(cv::Mat::zeros(subImgHeight.at(i), binaryImg.cols, CV_8UC1));
@@ -391,7 +391,7 @@ static int	getMaxDeltaOrdProfile(int interline, int subImgCenter, cv::Mat const&
 	int		deltaXPRange = std::round(interline / 2.0);
 	int		index = 0;
 	
-	// deltaXPRange range is [-interline / 2; interline / 2] to evaluate the best vertical shift in this range of values that maximizes the horizontal profile and then represents the best shift to find the nearest values of the middle of every lines in a stave
+	// deltaXPRange range is [-interline / 2; interline / 2] to evaluate the best vertical shift in this range of value that maximizes the horizontal profile and then represents the best shift to find the nearest value of the middle of every line in a stave
 	for(int deltaXP = -deltaXPRange; deltaXP <= deltaXPRange; ++deltaXP)
 	{
 		profileDeltaXP = 0;
@@ -410,7 +410,7 @@ static int	getMaxDeltaOrdProfile(int interline, int subImgCenter, cv::Mat const&
 				}
 			}
 		}
-		// we keep the maximum values of the profile according to the deltaXPRange (best 
+		// we keep the maximum values of the profile according to the deltaXPRange
 		if(maxProfile < profileDeltaXP)
 		{
 			maxProfile = profileDeltaXP;
@@ -497,8 +497,6 @@ Bivector  getOrdsPosition(std::vector<cv::Mat> const& subImg, double thicknessAv
 		{
 			rightOrds.at(i) = getRightOrd(profile, thresh, subImg.at(i).cols, interline);
 		}
-		// print the vertical profile and the detected ordinates extrema of the staves
-		//print(profile, subImg.at(i).rows, 1, subImg.at(i).cols, 1, leftOrds.at(i), rightOrds.at(i), thresh);
 	}
 	// store the values in the Bivector 'ords'
 	ords.setLeft(leftOrds);
@@ -558,14 +556,14 @@ std::vector<int>	getMiddleLineAbsc(int middleLineAbsc, int interline, int thickn
 				// update the value of the correlation at y by weighting its value with its previous value (at y - 1)
 				maskImgCorrelation.at<double>(xShifted + xShiftedRange, y) *= (1.0 - alpha);
 				maskImgCorrelation.at<double>(xShifted + xShiftedRange, y) +=  (maskImgCorrelation.at<double>(xShifted + xShiftedRange, y - 1) * alpha);
-				// store xShifted that maximize the filtered correlation
+				// store xShifted maximizing the filtered correlation
 				if(maskImgCorrelation.at<double>(xShifted + xShiftedRange, y) > maxCor)
 				{
 					maxCor = maskImgCorrelation.at<double>(xShifted + xShiftedRange, y);
 					shift = xShifted;
 				}
 			}
-			// update the abscissa of the center line position
+			// update the abscissa of the middle line
 			improvedCenterLineAbsc.at(y - leftOrd) += shift;
 		}
 		maskImgCorrelation.release();
@@ -634,7 +632,7 @@ static cv::Mat	processMaskImgCorrelation(int startY, int leftOrd, int rightOrd, 
 				{
 					imgValue = 1.0;
 				}
-				// get the correlation of every ordinates and with x shifted aroud the abscissa of the center line of the stave
+				// get the correlation of every ordinate and with x shifted aroud the abscissa of the middle line of the stave
 				maskImgCorrelation.at<double>(xShifted + xShiftedRange, y) += maskValue * imgValue;
 			}
 			maskImgCorrelation.at<double>(xShifted + xShiftedRange, y) /= staveHeight;
