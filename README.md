@@ -5,7 +5,7 @@
 
 <p><strong>Main goal : </strong>Build a model and implement a prototype for turning the pages of a score when the musician is playing the end of the viewed staves (lines). </br>
 <p><strong>Progress : </strong>The first step of the work focused on the correction of the slope of the score, then the position of the lines were extracted and the lines of the staves were removed. The bounding boxes process is in progress for now.</br></p>
-<p><strong>To build the project : </strong>
+<p><strong>To build the project : </strong></br>
 Use 'make' to build </br>Use 'make doc' to generate the documentation</p>
 <p><strong>To test it: </strong>Specify the executable './grims' and the path of a score as a first argument, then choose one ore more of the following arguments to see the results fo the processes :
 <ul>
@@ -30,6 +30,3 @@ Use 'make' to build </br>Use 'make doc' to generate the documentation</p>
 <li>clang++ (Compiler version 3.6.0-2ubuntu1)</li>
 <li>VIM (Editor)</li>
 </ul>
-
-<strong>To build the project : </strong>
-<p>use 'make' to build </br> use 'make doc' to generate the documentation</p>
